@@ -1,0 +1,57 @@
+2026-02-21 02:38:33,969 | INFO | Création utilisateur : lory@bmi.bj | rôle=ingenieur_maintenance
+2026-02-21 02:50:16,582 | INFO | Création utilisateur : norbe@bmi.bj | rôle=operateur_fanuc
+2026-02-21 23:14:19 | INFO     | CONNEXION_REUSSIE | user=kofi@bmi.bj ip=127.0.0.1 role=operateur_fanuc
+2026-02-22 13:44:19 | WARNING  | TENTATIVES_MULTIPLES | user=kofi@bmi.bj ip=127.0.0.1 nb=3/5
+2026-02-22 13:44:21 | WARNING  | TENTATIVES_MULTIPLES | user=kofi@bmi.bj ip=127.0.0.1 nb=4/5
+2026-02-22 13:44:23 | WARNING  | TENTATIVES_MULTIPLES | user=kofi@bmi.bj ip=127.0.0.1 nb=5/5
+2026-02-22 13:48:39 | WARNING  | TENTATIVES_MULTIPLES | user=auditeur@bmi.bj ip=192.168.100.54 nb=3/5
+2026-02-22 13:48:40 | WARNING  | TENTATIVES_MULTIPLES | user=auditeur@bmi.bj ip=192.168.100.54 nb=4/5
+2026-02-22 13:48:43 | WARNING  | TENTATIVES_MULTIPLES | user=auditeur@bmi.bj ip=192.168.100.54 nb=5/5
+2026-02-22 21:58:43 | WARNING  | TENTATIVES_MULTIPLES | user=kofi@bmi.bj ip=127.0.0.1 nb=3/5
+2026-02-22 21:58:44 | WARNING  | TENTATIVES_MULTIPLES | user=kofi@bmi.bj ip=127.0.0.1 nb=4/5
+2026-02-22 21:59:19 | INFO     | CONNEXION_REUSSIE | user=kofi@bmi.bj ip=127.0.0.1 role=operateur_fanuc
+2026-02-23 01:10:33 | WARNING  | TENTATIVES_MULTIPLES | user=auditeur@bmi.bj ip=127.0.0.1 nb=3/5
+2026-02-23 01:10:35 | WARNING  | TENTATIVES_MULTIPLES | user=auditeur@bmi.bj ip=127.0.0.1 nb=4/5
+2026-02-23 01:10:36 | WARNING  | TENTATIVES_MULTIPLES | user=auditeur@bmi.bj ip=127.0.0.1 nb=5/5
+2026-02-23 01:19:52 | WARNING  | TENTATIVES_MULTIPLES | user=auditeur@bmi.bj ip=127.0.0.1 nb=3/5
+2026-02-23 01:19:53 | WARNING  | TENTATIVES_MULTIPLES | user=auditeur@bmi.bj ip=127.0.0.1 nb=4/5
+2026-02-23 01:19:54 | WARNING  | TENTATIVES_MULTIPLES | user=auditeur@bmi.bj ip=127.0.0.1 nb=5/5
+2026-02-23 13:33:52 | INFO     | CONNEXION_REUSSIE | user=kofi@bmi.bj ip=127.0.0.1 role=operateur_fanuc
+2026-02-23 13:42:42 | WARNING  | TENTATIVES_MULTIPLES | user=kofi@bmi.bj ip=127.0.0.1 nb=3/5
+2026-02-23 13:43:11 | WARNING  | TENTATIVES_MULTIPLES | user=kofi@bmi.bj ip=127.0.0.1 nb=4/5
+2026-02-23 13:43:13 | WARNING  | TENTATIVES_MULTIPLES | user=kofi@bmi.bj ip=127.0.0.1 nb=5/5
+2026-02-23 13:52:53 | INFO     | CONNEXION_REUSSIE | user=kofi@bmi.bj ip=127.0.0.1 role=operateur_fanuc
+2026-02-23 13:59:15 | INFO     | CONNEXION_REUSSIE | user=kofi@bmi.bj ip=192.168.100.159 role=operateur_fanuc
+2026-02-23 13:59:58 | WARNING  | TENTATIVES_MULTIPLES | user=kofi@bmi.bj ip=192.168.100.159 nb=3/5
+2026-02-23 14:00:39 | INFO     | CONNEXION_REUSSIE | user=kofi@bmi.bj ip=192.168.100.159 role=operateur_fanuc
+2026-02-23 14:01:33 | WARNING  | TENTATIVES_MULTIPLES | user=kofi@bmi.bj ip=192.168.100.159 nb=3/5
+2026-02-23 14:01:34 | WARNING  | TENTATIVES_MULTIPLES | user=kofi@bmi.bj ip=192.168.100.159 nb=4/5
+2026-02-23 14:01:35 | WARNING  | TENTATIVES_MULTIPLES | user=kofi@bmi.bj ip=192.168.100.159 nb=5/5
+2026-02-23 15:00:52,830 | INFO | Création utilisateur : alice@bmi.bj | rôle=operateur_fanuc | mdp_temp=True
+2026-02-23 15:03:41 | INFO     | CONNEXION_REUSSIE | user=alice@bmi.bj ip=127.0.0.1 role=operateur_fanuc
+2026-02-23 15:13:35,452 | INFO | Création utilisateur : alo@bmi.bj | rôle=operateur_fanuc | mdp_temp=True
+2026-02-23 15:27:12,559 | INFO | Création utilisateur : alic@bmi.bj | rôle=operateur_fanuc | mdp_temp=True
+2026-02-23 15:29:44 | INFO     | CONNEXION_REUSSIE | user=alic@bmi.bj ip=127.0.0.1 role=operateur_fanuc
+2026-02-23 15:31:38 | INFO     | CONNEXION_REUSSIE | user=alic@bmi.bj ip=127.0.0.1 role=operateur_fanuc
+2026-02-23 15:34:51,027 | INFO | Création utilisateur : lolo@bmi.bj | rôle=ingenieur_maintenance | mdp_temp=True
+2026-02-23 21:20:43,627 | INFO | Création utilisateur : marc@bmi.bj | rôle=administrateur | mdp_temp=True
+2026-02-23 21:26:25 | INFO     | CONNEXION_REUSSIE | user=marc@bmi.bj ip=192.168.100.43 role=administrateur
+2026-02-23 21:28:07 | INFO     | CONNEXION_REUSSIE | user=marc@bmi.bj ip=192.168.100.43 role=administrateur
+2026-02-23 21:29:45 | WARNING  | TENTATIVES_MULTIPLES | user=marc@bmi.bj ip=192.168.100.43 nb=3/5
+2026-02-23 21:29:48 | WARNING  | TENTATIVES_MULTIPLES | user=marc@bmi.bj ip=192.168.100.43 nb=4/5
+2026-02-23 21:30:03 | WARNING  | TENTATIVES_MULTIPLES | user=marc@bmi.bj ip=192.168.100.43 nb=5/5
+2026-02-24 13:52:19 | INFO     | CONNEXION_REUSSIE | user=kofi@bmi.bj ip=127.0.0.1 role=operateur_fanuc
+2026-02-24 19:40:40 | WARNING  | TENTATIVES_MULTIPLES | user=kofi@bmi.bj ip=127.0.0.1 nb=3/5
+2026-02-24 19:40:41 | WARNING  | TENTATIVES_MULTIPLES | user=admin@bmi.bj ip=127.0.0.1 nb=3/5
+2026-02-24 19:40:42 | WARNING  | TENTATIVES_MULTIPLES | user=admin@bmi.bj ip=127.0.0.1 nb=5/5
+2026-02-24 19:40:42 | WARNING  | TENTATIVES_MULTIPLES | user=admin@bmi.bj ip=127.0.0.1 nb=7/5
+2026-02-24 19:40:43 | WARNING  | TENTATIVES_MULTIPLES | user=admin@bmi.bj ip=127.0.0.1 nb=9/5
+2026-02-24 19:40:43 | WARNING  | TENTATIVES_MULTIPLES | user=admin@bmi.bj ip=127.0.0.1 nb=11/5
+2026-02-24 19:40:44 | WARNING  | TENTATIVES_MULTIPLES | user=admin@bmi.bj ip=127.0.0.1 nb=13/5
+2026-02-24 19:40:45 | INFO     | CONNEXION_REUSSIE | user=kofi@bmi.bj ip=127.0.0.1 role=operateur_fanuc
+2026-02-24 19:40:45 | CRITICAL | VOL_TOKEN_DETECTE | Réutilisation refresh token ! user=kofi@bmi.bj — tous tokens révoqués
+2026-02-24 19:40:46 | INFO     | CONNEXION_REUSSIE | user=kofi@bmi.bj ip=127.0.0.1 role=operateur_fanuc
+2026-02-24 19:40:48 | INFO     | CONNEXION_REUSSIE | user=admin@bmi.bj ip=127.0.0.1 role=administrateur
+2026-02-24 19:40:49 | INFO     | CONNEXION_REUSSIE | user=ingenieur@bmi.bj ip=127.0.0.1 role=ingenieur_maintenance
+2026-02-24 19:40:51 | INFO     | CONNEXION_REUSSIE | user=auditeur@bmi.bj ip=127.0.0.1 role=auditeur
+2026-02-24 19:40:53 | INFO     | CONNEXION_REUSSIE | user=kofi@bmi.bj ip=127.0.0.1 role=operateur_fanuc

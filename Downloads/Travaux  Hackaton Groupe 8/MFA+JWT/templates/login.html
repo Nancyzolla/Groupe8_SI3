@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BMI — Connexion Sécurisée</title>
+  <style>
+    /* ======== BASE ======== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(
+        135deg, #0a1628 0%, #1a3a5c 50%, #0d2137 100%
+      );
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* ======== CARTE ======== */
+    .card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 36px;
+      width: 100%;
+      max-width: 460px;
+    }
+
+    /* ======== ENTÊTE ======== */
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .logo {
+      font-size: 32px;
+      font-weight: 800;
+      color: #4da6ff;
+      letter-spacing: 2px;
+    }
+    .logo span { color: white; }
+    .sous-titre {
+      color: rgba(255,255,255,0.45);
+      font-size: 13px;
+      margin-top: 5px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(77,166,255,0.12);
+      border: 1px solid rgba(77,166,255,0.3);
+      color: #4da6ff;
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-top: 8px;
+    }
+
+    /* ======== ÉTAPES ======== */
+    .etapes {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+    .etape {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .etape-num {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.3);
+      transition: all 0.4s;
+    }
+    .etape-label {
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
+      transition: all 0.4s;
+      white-space: nowrap;
+    }
+    .sep {
+      flex: 1;
+      height: 2px;
+      background: rgba(255,255,255,0.1);
+      margin: 0 8px;
+      margin-bottom: 14px;
+      min-width: 30px;
+      transition: background 0.4s;
+    }
+    .etape.active .etape-num {
+      border-color: #4da6ff;
+      background: #4da6ff;
+      color: white;
+    }
+    .etape.active .etape-label { color: #4da6ff; }
+    .etape.done .etape-num {
+      border-color: #4caf50;
+      background: #4caf50;
+      color: white;
+    }
+    .etape.done .etape-label { color: #4caf50; }
+    .sep.done { background: #4caf50; }
+
+    /* ======== SECTIONS ======== */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* ======== CHAMPS ======== */
+    .champ { margin-bottom: 16px; }
+    .champ label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.55);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 7px;
+    }
+    .input-wrap { position: relative; }
+    .champ input {
+      width: 100%;
+      padding: 13px 14px;
+      background: rgba(255,255,255,0.07);
+      border: 1.5px solid rgba(255,255,255,0.13);
+      border-radius: 10px;
+      color: white;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .champ input:focus {
+      border-color: #4da6ff;
+      background: rgba(77,166,255,0.06);
+    }
+    .champ input::placeholder { color: rgba(255,255,255,0.25); }
+    .oeil {
+      position: absolute;
+      right: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: rgba(255,255,255,0.35);
+      font-size: 16px;
+      user-select: none;
+    }
+
+    /* ======== BOUTONS ======== */
+    .btn {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(135deg, #1565c0, #4da6ff);
+      color: white;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn:hover:not(:disabled) {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-lien {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.4);
+      font-size: 13px;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+      margin-top: 12px;
+      padding: 4px;
+      display: block;
+    }
+    .btn-lien:hover { color: rgba(255,255,255,0.7); }
+
+    /* ======== ALERTES ======== */
+    .alerte {
+      padding: 11px 14px;
+      border-radius: 9px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+      line-height: 1.4;
+    }
+    .alerte.erreur {
+      background: rgba(244,67,54,0.12);
+      border: 1px solid rgba(244,67,54,0.35);
+      color: #ff6b6b;
+    }
+    .alerte.info {
+      background: rgba(77,166,255,0.1);
+      border: 1px solid rgba(77,166,255,0.25);
+      color: #7ec8ff;
+    }
+
+    /* ======== SECTION QR ======== */
+    .qr-wrapper {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    /* --- État 1 : QR visible --- */
+    #zone-qr {
+      transition: opacity 0.6s, transform 0.6s;
+    }
+    .qr-titre {
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 14px;
+      line-height: 1.6;
+    }
+    .qr-titre strong { color: white; }
+
+    .qr-cadre {
+      display: inline-block;
+      background: white;
+      padding: 12px;
+      border-radius: 14px;
+      margin-bottom: 10px;
+      box-shadow: 0 0 0 4px rgba(77,166,255,0.2);
+    }
+    .qr-cadre img {
+      display: block;
+      width: 190px;
+      height: 190px;
+    }
+    .qr-loader {
+      width: 190px;
+      height: 190px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f0f0f0;
+      border-radius: 8px;
+      color: #666;
+      font-size: 13px;
+    }
+    .qr-legende {
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      font-family: monospace;
+    }
+
+    /* Pulse sur le QR en attente */
+    @keyframes pulse-border {
+      0%   { box-shadow: 0 0 0 0   rgba(77,166,255,0.4); }
+      70%  { box-shadow: 0 0 0 10px rgba(77,166,255,0);   }
+      100% { box-shadow: 0 0 0 0   rgba(77,166,255,0);   }
+    }
+    .qr-cadre.en-attente {
+      animation: pulse-border 2s infinite;
+    }
+
+    /* Séparateur */
+    .ou-separateur {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 16px 0;
+      color: rgba(255,255,255,0.25);
+      font-size: 12px;
+    }
+    .ou-separateur::before,
+    .ou-separateur::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+    }
+
+    /* --- État 2 : QR scanné → confirmation --- */
+    #zone-confirme {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.6s;
+    }
+    .confirme-box {
+      background: rgba(76,175,80,0.08);
+      border: 1px solid rgba(76,175,80,0.3);
+      border-radius: 14px;
+      padding: 24px 20px;
+      margin-bottom: 16px;
+    }
+    .confirme-icone {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+    .confirme-titre {
+      font-size: 16px;
+      font-weight: 700;
+      color: #4caf50;
+      margin-bottom: 6px;
+    }
+    .confirme-texte {
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.5;
+    }
+
+    /* ======== TIMER TOTP ======== */
+    .timer-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .timer-svg {
+      width: 40px;
+      height: 40px;
+      transform: rotate(-90deg);
+      flex-shrink: 0;
+    }
+    .timer-track {
+      fill: none;
+      stroke: rgba(255,255,255,0.1);
+      stroke-width: 3;
+    }
+    .timer-arc {
+      fill: none;
+      stroke: #4da6ff;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-dasharray: 100.53;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 1s linear, stroke 0.3s;
+    }
+    .timer-info {
+      font-size: 13px;
+      color: rgba(255,255,255,0.5);
+    }
+    .timer-info strong {
+      color: #4da6ff;
+      font-size: 16px;
+    }
+
+    /* ======== CASES TOTP ======== */
+    .totp-cases {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .totp-case {
+      width: 48px;
+      height: 56px;
+      background: rgba(255,255,255,0.07);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      color: white;
+      font-size: 22px;
+      font-weight: 700;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .totp-case:focus {
+      border-color: #4da6ff;
+      background: rgba(77,166,255,0.08);
+    }
+    .totp-case.ok {
+      border-color: rgba(76,175,80,0.6);
+    }
+
+    /* ======== SUCCÈS ======== */
+    .succes-icone {
+      font-size: 60px;
+      text-align: center;
+      margin: 8px 0 14px;
+    }
+    .succes-titre {
+      text-align: center;
+      font-size: 22px;
+      font-weight: 700;
+      color: #4caf50;
+      margin-bottom: 8px;
+    }
+    .succes-card {
+      background: rgba(76,175,80,0.07);
+      border: 1px solid rgba(76,175,80,0.2);
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 20px;
+    }
+    .succes-card div {
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .succes-card div:last-child { border-bottom: none; }
+    .succes-card span {
+      color: white;
+      font-weight: 600;
+      float: right;
+    }
+
+    /* ======== PIED ======== */
+    .pied {
+      text-align: center;
+      margin-top: 22px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.2);
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+
+  <!-- ENTÊTE -->
+  <div class="header">
+    <div class="logo">BMI<span>.</span>SEC</div>
+    <div class="sous-titre">Plateforme IA — Maintenance Prédictive</div>
+    <div class="badge">🔐 Authentification MFA</div>
+  </div>
+
+  <!-- ÉTAPES -->
+  <div class="etapes">
+    <div class="etape active" id="e1">
+      <div class="etape-num">1</div>
+      <div class="etape-label">Identifiants</div>
+    </div>
+    <div class="sep" id="sep1"></div>
+    <div class="etape" id="e2">
+      <div class="etape-num">2</div>
+      <div class="etape-label">Vérification</div>
+    </div>
+    <div class="sep" id="sep2"></div>
+    <div class="etape" id="e3">
+      <div class="etape-num">3</div>
+      <div class="etape-label">Accès</div>
+    </div>
+  </div>
+
+  <!-- ALERTE GLOBALE -->
+  <div class="alerte" id="alerte"></div>
+
+  <!-- ============================= -->
+  <!-- ÉTAPE 1 : EMAIL + MOT DE PASSE -->
+  <!-- ============================= -->
+  <div class="section active" id="s1">
+
+    <div class="champ">
+      <label>Adresse e-mail</label>
+      <input
+        type="email"
+        id="username"
+        placeholder="kofi@bmi.bj"
+        autocomplete="username"
+      >
+    </div>
+
+    <div class="champ">
+      <label>Mot de passe</label>
+      <div class="input-wrap">
+        <input
+          type="password"
+          id="password"
+          placeholder="••••••••"
+          autocomplete="current-password"
+        >
+        <span class="oeil" onclick="toggleMdp()">👁</span>
+      </div>
+    </div>
+
+    <!-- 5 points qui s'éteignent à chaque échec -->
+    <div id="zone-points" style="
+      display:none;
+      text-align:center;
+      margin-bottom:12px;
+    "></div>
+
+    <button class="btn" id="btn1" onclick="etape1()">
+      Continuer →
+    </button>
+
+  </div>
+
+  <!-- ============================= -->
+  <!-- ÉTAPE 2 : QR CODE + TOTP     -->
+  <!-- ============================= -->
+  <div class="section" id="s2">
+
+    <div class="qr-wrapper">
+
+      <!-- QR CODE (avant scan) -->
+      <div id="zone-qr">
+        <p class="qr-titre">
+          <strong>Première connexion ?</strong><br>
+          Scannez ce QR code avec
+          <strong>Google Authenticator</strong>.<br>
+          Il disparaîtra une fois configuré.
+        </p>
+
+        <div class="qr-cadre en-attente" id="qr-cadre">
+          <div class="qr-loader" id="qr-loader">
+            Chargement...
+          </div>
+          <img
+            id="qr-img"
+            src=""
+            alt="QR Code TOTP"
+            style="display:none; width:190px; height:190px;"
+          >
+        </div>
+
+        <div class="qr-legende" id="qr-legende">
+          BMI_Usine_GDIZ
+        </div>
+      </div>
+
+      <!-- CONFIRMATION (après scan) -->
+      <div id="zone-confirme">
+        <div class="confirme-box">
+          <div class="confirme-icone">✅</div>
+          <div class="confirme-titre">
+            Google Authenticator configuré !
+          </div>
+          <div class="confirme-texte">
+            Ouvrez l'application et entrez<br>
+            le code à 6 chiffres affiché.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Séparateur -->
+    <div class="ou-separateur">
+      Entrez le code de votre application
+    </div>
+
+    <!-- TIMER -->
+    <div class="timer-wrap">
+      <svg class="timer-svg" viewBox="0 0 40 40">
+        <circle class="timer-track" cx="20" cy="20" r="16"/>
+        <circle class="timer-arc" cx="20" cy="20"
+                r="16" id="arc"/>
+      </svg>
+      <div class="timer-info">
+        Code valable encore
+        <strong id="timer-txt">30</strong>s
+      </div>
+    </div>
+
+    <!-- 6 CASES TOTP -->
+    <div class="totp-cases">
+      <input class="totp-case" id="c0" maxlength="1"
+             type="text" inputmode="numeric"
+             onkeydown="nav(event,0)" oninput="sync(0)">
+      <input class="totp-case" id="c1" maxlength="1"
+             type="text" inputmode="numeric"
+             onkeydown="nav(event,1)" oninput="sync(1)">
+      <input class="totp-case" id="c2" maxlength="1"
+             type="text" inputmode="numeric"
+             onkeydown="nav(event,2)" oninput="sync(2)">
+      <input class="totp-case" id="c3" maxlength="1"
+             type="text" inputmode="numeric"
+             onkeydown="nav(event,3)" oninput="sync(3)">
+      <input class="totp-case" id="c4" maxlength="1"
+             type="text" inputmode="numeric"
+             onkeydown="nav(event,4)" oninput="sync(4)">
+      <input class="totp-case" id="c5" maxlength="1"
+             type="text" inputmode="numeric"
+             onkeydown="nav(event,5)" oninput="sync(5)">
+    </div>
+
+    <button class="btn" id="btn2"
+            onclick="etape2()" disabled>
+      Vérifier le code
+    </button>
+
+    <button class="btn-lien" onclick="retour()">
+      ← Retour
+    </button>
+
+  </div>
+
+  <!-- ============================= -->
+  <!-- ÉTAPE 3 : SUCCÈS             -->
+  <!-- ============================= -->
+  <div class="section" id="s3">
+    <div class="succes-icone">✅</div>
+    <div class="succes-titre">Accès autorisé</div>
+    <div class="succes-card" id="succes-card"></div>
+    <button class="btn" onclick="dashboard()">
+      Accéder au tableau de bord →
+    </button>
+  </div>
+
+  <div class="pied">
+    BMI Usine GDIZ — Glo-Djigbé, Bénin &nbsp;|&nbsp; TLS 1.3
+  </div>
+</div>
+
+
+
+<!-- ============================================================ -->
+<!-- SECTION 4 — CHANGEMENT MOT DE PASSE FORCÉ                    -->
+<!-- ============================================================ -->
+<div id="s4" style="display:none;">
+  <div style="text-align:center;margin-bottom:18px;">
+    <div style="font-size:52px;">🔐</div>
+    <div style="font-size:20px;font-weight:700;color:#f59e0b;margin:8px 0 4px;">Changement de mot de passe requis</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.6);">Votre mot de passe est temporaire. Choisissez un nouveau mot de passe avant de continuer.</div>
+  </div>
+  <div id="mdp-alerte" style="display:none;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:12px 16px;font-size:13px;color:#f87171;margin-bottom:14px;"></div>
+  <div style="margin-bottom:12px;">
+    <label style="font-size:12px;color:rgba(255,255,255,0.55);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Nouveau mot de passe</label>
+    <input id="mdp-new" type="password" placeholder="Minimum 8 car. : Maj, min, chiffre, spécial"
+      style="width:100%;box-sizing:border-box;padding:12px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;font-size:14px;outline:none;margin-top:6px;" />
+    <!-- Barre de force -->
+    <div style="margin-top:8px;height:4px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;">
+      <div id="force-bar" style="height:100%;width:0%;transition:width 0.3s,background 0.3s;border-radius:4px;"></div>
+    </div>
+    <div id="force-label" style="font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;"></div>
+  </div>
+  <div style="margin-bottom:18px;">
+    <label style="font-size:12px;color:rgba(255,255,255,0.55);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Confirmer</label>
+    <input id="mdp-confirm" type="password" placeholder="Répétez le mot de passe"
+      style="width:100%;box-sizing:border-box;padding:12px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;font-size:14px;outline:none;margin-top:6px;" />
+  </div>
+  <button onclick="soumettreMdp()"
+    style="width:100%;padding:14px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;">
+    Valider mon mot de passe
+  </button>
+  <div style="text-align:center;margin-top:14px;font-size:12px;color:rgba(255,255,255,0.35);">
+    Ce mot de passe ne sera connu que de vous. L'administrateur ne pourra plus le voir.
+  </div>
+</div>
+
+<script>
+// ============================================================
+// ÉTAT GLOBAL
+// ============================================================
+const G = {
+  username:          "",
+  password:          "",
+  ticket:            "",
+  qrScanne:          false,
+  timerLoop:         null,
+  pollLoop:          null,
+  _blocageInterval:  null,
+  MAX_ESSAIS:        5,   // doit correspondre à MAX_TENTATIVES serveur
+};
+
+const CIRCONF = 2 * Math.PI * 16; // ~100.53
+
+// ============================================================
+// ÉTAPE 1 — Vérifier email + mot de passe
+// ============================================================
+async function etape1() {
+  const username = document.getElementById("username")
+                            .value.trim().toLowerCase();
+  const password = document.getElementById("password").value;
+
+  if (!username || !password) {
+    afficherAlerte("Veuillez remplir tous les champs.", "erreur");
+    return;
+  }
+
+  const btn       = document.getElementById("btn1");
+  btn.disabled    = true;
+  btn.textContent = "Vérification...";
+
+  try {
+    const r = await fetch("/check-credentials", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ username, password })
+    });
+    const d = await r.json();
+
+    if (r.ok) {
+      // ✅ Succès — effacer les points et passer étape 2
+      cacherPoints();
+      G.username = username;
+      G.password = password;
+      allerEtape2();
+      return;
+
+    } else if (r.status === 429) {
+      // 🔒 Bloqué côté serveur — utiliser le vrai temps restant
+      const secondes = d.temps_restant || 300;
+      ejecterUtilisateur(secondes);
+
+    } else {
+      // ❌ Mauvais mot de passe
+      const restantes = d.tentatives_restantes ?? (G.MAX_ESSAIS - 1);
+
+      if (restantes <= 0) {
+        // 5ème échec → éjecter immédiatement (300s par défaut)
+        ejecterUtilisateur(300);
+      } else {
+        // Éteindre un point et réactiver
+        allumerPoints(restantes);
+        btn.disabled    = false;
+        btn.textContent = "Continuer →";
+      }
+    }
+
+  } catch(err) {
+    afficherAlerte("Serveur inaccessible.", "erreur");
+    btn.disabled    = false;
+    btn.textContent = "Continuer →";
+  }
+}
+
+// ============================================================
+// POINTS DE TENTATIVES (5 cercles qui s'éteignent)
+// ============================================================
+
+// Dessiner les 5 points dans la zone #zone-points
+// restantes = nombre de tentatives encore disponibles
+function allumerPoints(restantes) {
+  const zone     = document.getElementById("zone-points");
+  const max      = G.MAX_ESSAIS;
+  const utilises = max - restantes;
+
+  let html = '<div style="display:flex;gap:8px;justify-content:center;margin-bottom:6px;">';
+  for (let i = 0; i < max; i++) {
+    if (i < utilises) {
+      // Point éteint = tentative consommée
+      html += `<span style="
+        width:14px;height:14px;border-radius:50%;
+        background:rgba(255,255,255,0.12);
+        border:2px solid rgba(255,255,255,0.2);
+        display:inline-block;
+        transition:all 0.4s;
+      "></span>`;
+    } else {
+      // Point allumé = tentative restante
+      html += `<span style="
+        width:14px;height:14px;border-radius:50%;
+        background:${restantes === 1 ? '#f44336' : '#ff9800'};
+        display:inline-block;
+        box-shadow:0 0 6px ${restantes === 1 ? '#f44336' : '#ff9800'};
+        transition:all 0.4s;
+      "></span>`;
+    }
+  }
+  html += '</div>';
+
+  const msg = restantes === 1
+    ? '<span style="color:#f44336;font-weight:700;font-size:13px;">⚠ Dernière tentative avant éjection</span>'
+    : `<span style="color:#ff9800;font-size:12px;">${restantes} tentative(s) restante(s)</span>`;
+
+  zone.innerHTML = html + msg;
+  zone.style.display = "block";
+
+  afficherAlerte("Identifiants incorrects.", "erreur");
+}
+
+function cacherPoints() {
+  const zone = document.getElementById("zone-points");
+  if (zone) {
+    zone.innerHTML = "";
+    zone.style.display = "none";
+  }
+}
+
+// ============================================================
+// ÉJECTION — 5 échecs → vider, revenir étape 1, compte à rebours
+// ============================================================
+function ejecterUtilisateur(secondes) {
+  // Vider tous les champs
+  document.getElementById("username").value = "";
+  document.getElementById("password").value = "";
+  cacherPoints();
+
+  // Revenir à l'étape 1
+  document.querySelectorAll(".section").forEach(s =>
+    s.classList.remove("active")
+  );
+  document.getElementById("s1").classList.add("active");
+
+  // Réinitialiser indicateur étapes
+  document.getElementById("e1").className   = "etape active";
+  document.getElementById("e2").className   = "etape";
+  document.getElementById("e3").className   = "etape";
+  document.getElementById("sep1").className = "sep";
+  document.getElementById("sep2").className = "sep";
+
+  // Arrêter les boucles
+  clearInterval(G.timerLoop);
+  clearInterval(G.pollLoop);
+  G.ticket   = "";
+  G.qrScanne = false;
+  G.username = "";
+  G.password = "";
+
+  // Démarrer le compte à rebours de blocage
+  demarrerCompteBlocage(secondes);
+}
+
+// ============================================================
+// COMPTE À REBOURS DE BLOCAGE (après éjection)
+// ============================================================
+function demarrerCompteBlocage(duree) {
+  const btn  = document.getElementById("btn1");
+  const inp1 = document.getElementById("username");
+  const inp2 = document.getElementById("password");
+
+  btn.disabled  = true;
+  inp1.disabled = true;
+  inp2.disabled = true;
+
+  if (G._blocageInterval) clearInterval(G._blocageInterval);
+
+  let temps = duree;
+
+  function tick() {
+    const min = Math.floor(temps / 60);
+    const sec = temps % 60;
+    const str = min > 0
+      ? `${min}m ${String(sec).padStart(2,"0")}s`
+      : `${temps}s`;
+
+    const pct    = Math.round((temps / duree) * 100);
+    const couleur = pct > 60 ? "#f44336"
+                  : pct > 25 ? "#ff9800"
+                  : "#4caf50";
+
+    afficherAlerteHtml(
+      `🚫 <strong>Session bloquée — 5 tentatives échouées</strong><br>
+       <div style="
+         margin:10px 0 6px;
+         background:rgba(255,255,255,0.1);
+         border-radius:6px;height:6px;overflow:hidden;
+       ">
+         <div style="
+           width:${pct}%;height:100%;
+           background:${couleur};
+           transition:width 1s linear;
+           border-radius:6px;
+         "></div>
+       </div>
+       <span style="font-size:12px;color:rgba(255,255,255,0.6);">
+         Réessayez dans <strong style="color:white;">${str}</strong>
+       </span>`,
+      "erreur"
+    );
+    btn.textContent = `Bloqué — ${str}`;
+
+    if (temps <= 0) {
+      clearInterval(G._blocageInterval);
+      G._blocageInterval = null;
+      btn.disabled  = false;
+      inp1.disabled = false;
+      inp2.disabled = false;
+      btn.textContent = "Continuer →";
+      afficherAlerte("Vous pouvez réessayer.", "info");
+    }
+    temps--;
+  }
+
+  tick();
+  G._blocageInterval = setInterval(tick, 1000);
+}
+
+// ============================================================
+// ÉTAPE 2 — Afficher QR code + démarrer polling
+// ============================================================
+async function allerEtape2() {
+  cacherAlerte();
+
+  // Mettre à jour indicateur d'étapes
+  document.getElementById("e1").className   = "etape done";
+  document.getElementById("sep1").className = "sep done";
+  document.getElementById("e2").className   = "etape active";
+
+  // Passer à la section 2
+  document.getElementById("s1").classList.remove("active");
+  document.getElementById("s2").classList.add("active");
+
+  // Charger QR code
+  await chargerQR();
+
+  // Démarrer le timer TOTP
+  demarrerTimer();
+
+  // Focus sur la première case
+  document.getElementById("c0").focus();
+}
+
+async function chargerQR() {
+  try {
+    const r = await fetch(
+      "/api/qr-code?username=" +
+      encodeURIComponent(G.username)
+    );
+    const d = await r.json();
+
+    if (r.ok && d.qr_b64) {
+      G.ticket = d.ticket;
+
+      // Afficher le QR code
+      const img         = document.getElementById("qr-img");
+      img.src           = "data:image/png;base64," + d.qr_b64;
+      img.style.display = "block";
+
+      document.getElementById("qr-loader").style.display = "none";
+      document.getElementById("qr-legende").textContent  =
+        "BMI_Usine_GDIZ — " + G.username;
+
+      // Démarrer le polling pour détecter le scan
+      demarrerPolling();
+
+    } else {
+      document.getElementById("qr-loader").textContent =
+        "QR code indisponible";
+    }
+  } catch(err) {
+    document.getElementById("qr-loader").textContent =
+      "Erreur de chargement";
+  }
+}
+
+// ============================================================
+// POLLING — Vérifier si le QR a été scanné (toutes les 2s)
+// ============================================================
+function demarrerPolling() {
+  if (G.pollLoop) clearInterval(G.pollLoop);
+
+  G.pollLoop = setInterval(async () => {
+    if (G.qrScanne || !G.ticket) {
+      clearInterval(G.pollLoop);
+      return;
+    }
+
+    try {
+      const r = await fetch(
+        `/api/qr-status` +
+        `?ticket=${encodeURIComponent(G.ticket)}` +
+        `&username=${encodeURIComponent(G.username)}`
+      );
+      const d = await r.json();
+
+      if (d.scanne) {
+        clearInterval(G.pollLoop);
+        G.qrScanne = true;
+        faireDisparaitreQR();
+      }
+    } catch(err) {
+      // Ignorer erreurs réseau temporaires
+    }
+  }, 2000);
+}
+
+// Animation disparition QR → confirmation
+function faireDisparaitreQR() {
+  const zoneQR      = document.getElementById("zone-qr");
+  const zoneConfirme = document.getElementById("zone-confirme");
+
+  // Disparition avec animation
+  zoneQR.style.transition = "opacity 0.5s, transform 0.5s";
+  zoneQR.style.opacity    = "0";
+  zoneQR.style.transform  = "scale(0.85)";
+
+  setTimeout(() => {
+    zoneQR.style.display         = "none";
+    zoneConfirme.style.display   = "block";
+    zoneConfirme.style.opacity   = "0";
+    zoneConfirme.style.transition = "opacity 0.5s";
+
+    // Légère pause puis apparition
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        zoneConfirme.style.opacity = "1";
+      });
+    });
+  }, 500);
+}
+
+// ============================================================
+// TIMER TOTP (compte à rebours 30s)
+// ============================================================
+function demarrerTimer() {
+  if (G.timerLoop) clearInterval(G.timerLoop);
+
+  function tick() {
+    const now    = Math.floor(Date.now() / 1000);
+    const reste  = 30 - (now % 30);
+    const offset = CIRCONF * (1 - reste / 30);
+
+    document.getElementById("timer-txt").textContent = reste;
+
+    const arc              = document.getElementById("arc");
+    arc.style.strokeDashoffset = offset;
+    arc.style.stroke = reste < 10 ? "#f44336"
+                     : reste < 20 ? "#ff9800"
+                     : "#4da6ff";
+
+    // Mettre à jour la couleur du timer-info
+    const info = document.querySelector(".timer-info strong");
+    if (info) {
+      info.style.color = reste < 10 ? "#f44336"
+                       : reste < 20 ? "#ff9800"
+                       : "#4da6ff";
+    }
+  }
+
+  tick();
+  G.timerLoop = setInterval(tick, 1000);
+}
+
+// ============================================================
+// NAVIGATION DANS LES CASES TOTP
+// ============================================================
+function nav(e, i) {
+  const el = document.getElementById("c" + i);
+
+  if (e.key === "Backspace") {
+    el.value = "";
+    el.classList.remove("ok");
+    if (i > 0) document.getElementById("c" + (i-1)).focus();
+    actualiserBouton();
+    return;
+  }
+
+  // Avancer si chiffre valide entré
+  if (/^\d$/.test(e.key) && i < 5) {
+    setTimeout(() => {
+      if (el.value) document.getElementById("c" + (i+1)).focus();
+    }, 10);
+  }
+
+  // Entrée = soumettre si code complet
+  if (e.key === "Enter" && codeComplet()) etape2();
+
+  // Flèches
+  if (e.key === "ArrowRight" && i < 5) {
+    document.getElementById("c" + (i+1)).focus();
+  }
+  if (e.key === "ArrowLeft" && i > 0) {
+    document.getElementById("c" + (i-1)).focus();
+  }
+}
+
+function sync(i) {
+  const el  = document.getElementById("c" + i);
+  // Garder uniquement le premier chiffre
+  const val = el.value.replace(/\D/g, "").slice(0, 1);
+  el.value  = val;
+  el.classList.toggle("ok", val !== "");
+  actualiserBouton();
+
+  // Auto-avancement
+  if (val && i < 5) {
+    document.getElementById("c" + (i+1)).focus();
+  }
+}
+
+function codeComplet() {
+  return getCode().length === 6;
+}
+
+function actualiserBouton() {
+  document.getElementById("btn2").disabled = !codeComplet();
+}
+
+function getCode() {
+  return Array.from(
+    { length: 6 },
+    (_, i) => document.getElementById("c" + i).value
+  ).join("");
+}
+
+function viderCases() {
+  for (let i = 0; i < 6; i++) {
+    const el = document.getElementById("c" + i);
+    el.value = "";
+    el.classList.remove("ok");
+  }
+  document.getElementById("c0").focus();
+  actualiserBouton();
+}
+
+// ============================================================
+// ÉTAPE 2 — Vérifier le code TOTP
+// ============================================================
+async function etape2() {
+  const code = getCode();
+  const btn  = document.getElementById("btn2");
+
+  btn.disabled    = true;
+  btn.textContent = "Vérification...";
+
+  try {
+    // Si le QR n'a pas encore été marqué scanné
+    // → le confirmer maintenant avec le code entré
+    if (!G.qrScanne && G.ticket) {
+      const rc = await fetch("/api/qr-confirmer", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({
+          ticket:    G.ticket,
+          username:  G.username,
+          totp_code: code
+        })
+      });
+      const dc = await rc.json();
+
+      // Si code TOTP valide → faire disparaître le QR
+      if (rc.ok && dc.valide) {
+        G.qrScanne = true;
+        faireDisparaitreQR();
+      }
+    }
+
+    // Connexion complète (mot de passe + TOTP)
+    const r = await fetch("/login", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({
+        username:  G.username,
+        password:  G.password,
+        totp_code: code
+      })
+    });
+    const d = await r.json();
+
+    if (r.ok) {
+      clearInterval(G.timerLoop);
+      clearInterval(G.pollLoop);
+      G.access_token = d.access_token;   // stocker le JWT
+      if (d.must_changer) {
+        // Mot de passe temporaire → écran de changement forcé
+        allerChangementMdp();
+      } else {
+        allerEtape3(d);
+      }
+    } else {
+      afficherAlerte(
+        d.message || "Code incorrect — réessayez.",
+        "erreur"
+      );
+      viderCases();
+      btn.disabled    = false;
+      btn.textContent = "Vérifier le code";
+    }
+
+  } catch(err) {
+    afficherAlerte("Serveur inaccessible.", "erreur");
+    btn.disabled    = false;
+    btn.textContent = "Vérifier le code";
+  }
+}
+
+// ============================================================
+// ÉTAPE 3 — Afficher le succès
+// ============================================================
+function allerEtape3(data) {
+  cacherAlerte();
+
+  document.getElementById("e2").className   = "etape done";
+  document.getElementById("sep2").className = "sep done";
+  document.getElementById("e3").className   = "etape done";
+
+  document.getElementById("s2").classList.remove("active");
+  document.getElementById("s3").classList.add("active");
+
+  const labels = {
+    "administrateur":        "Administrateur",
+    "operateur_fanuc":       "Opérateur CNC FANUC",
+    "ingenieur_maintenance": "Ingénieur Maintenance",
+    "auditeur":              "Auditeur",
+  };
+
+  document.getElementById("succes-card").innerHTML = `
+    <div>
+      Utilisateur
+      <span>${G.username}</span>
+    </div>
+    <div>
+      Rôle
+      <span>${labels[data.role] || data.role}</span>
+    </div>
+    <div>
+      Token JWT
+      <span>RS256 — expire 15 min</span>
+    </div>
+    <div>
+      Session
+      <span>Refresh token 7 jours</span>
+    </div>
+  `;
+}
+
+function dashboard() {
+  alert(
+    "Redirection vers le tableau de bord BMI...\n" +
+    "Intégrer ici la route /dashboard"
+  );
+}
+
+// ============================================================
+// RETOUR ÉTAPE 1
+// ============================================================
+function retour() {
+  clearInterval(G.timerLoop);
+  clearInterval(G.pollLoop);
+  // Ne pas effacer G.blocageLoop ici — le blocage continue
+  // même si on revient à l'étape 1
+
+  G.ticket   = "";
+  G.qrScanne = false;
+
+  cacherAlerte();
+
+  document.getElementById("s2").classList.remove("active");
+  document.getElementById("s1").classList.add("active");
+
+  document.getElementById("e1").className   = "etape active";
+  document.getElementById("e2").className   = "etape";
+  document.getElementById("sep1").className = "sep";
+
+  viderCases();
+
+  // Réinitialiser la zone QR
+  const zoneQR       = document.getElementById("zone-qr");
+  const zoneConfirme = document.getElementById("zone-confirme");
+
+  zoneQR.style.display    = "block";
+  zoneQR.style.opacity    = "1";
+  zoneQR.style.transform  = "";
+  zoneConfirme.style.display = "none";
+
+  document.getElementById("qr-img").style.display    = "none";
+  document.getElementById("qr-loader").style.display = "flex";
+  document.getElementById("qr-loader").textContent   = "Chargement...";
+  document.getElementById("qr-cadre").className = "qr-cadre en-attente";
+}
+
+// ============================================================
+// ALERTES
+// ============================================================
+function afficherAlerte(msg, type) {
+  const el         = document.getElementById("alerte");
+  el.className     = "alerte " + type;
+  el.textContent   = msg;
+  el.style.display = "block";
+}
+
+function afficherAlerteHtml(html, type) {
+  const el         = document.getElementById("alerte");
+  el.className     = "alerte " + type;
+  el.innerHTML     = html;
+  el.style.display = "block";
+}
+
+function cacherAlerte() {
+  document.getElementById("alerte").style.display = "none";
+}
+
+// ============================================================
+// DIVERS
+// ============================================================
+function toggleMdp() {
+  const inp = document.getElementById("password");
+  inp.type  = inp.type === "password" ? "text" : "password";
+}
+
+// Entrée clavier sur le mot de passe
+document.getElementById("password")
+  .addEventListener("keypress", e => {
+    if (e.key === "Enter") etape1();
+  });
+
+// Coller un code TOTP complet (ex: depuis un SMS)
+document.getElementById("c0")
+  .addEventListener("paste", e => {
+    e.preventDefault();
+    const txt = (e.clipboardData || window.clipboardData)
+                  .getData("text")
+                  .replace(/\D/g, "")
+                  .slice(0, 6);
+    for (let i = 0; i < txt.length; i++) {
+      const el  = document.getElementById("c" + i);
+      el.value  = txt[i];
+      el.classList.add("ok");
+    }
+    if (txt.length === 6) {
+      document.getElementById("c5").focus();
+      actualiserBouton();
+    }
+  });
+
+// ============================================================
+// ÉCRAN CHANGEMENT MOT DE PASSE FORCÉ
+// ============================================================
+
+function allerChangementMdp() {
+  // Cacher toutes les sections
+  ["s1","s2","s3"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "none";
+  });
+  document.getElementById("s4").style.display = "block";
+
+  // Barre de force dynamique
+  document.getElementById("mdp-new").addEventListener("input", function() {
+    const v   = this.value;
+    const pct = evaluerForce(v);
+    const bar = document.getElementById("force-bar");
+    const lbl = document.getElementById("force-label");
+    bar.style.width = pct + "%";
+    if (pct < 40)       { bar.style.background = "#ef4444"; lbl.textContent = "Faible"; }
+    else if (pct < 70)  { bar.style.background = "#f59e0b"; lbl.textContent = "Moyen"; }
+    else                { bar.style.background = "#22c55e"; lbl.textContent = "Fort"; }
+  });
+}
+
+function evaluerForce(mdp) {
+  let score = 0;
+  if (mdp.length >= 8)  score += 20;
+  if (mdp.length >= 12) score += 10;
+  if (/[A-Z]/.test(mdp)) score += 20;
+  if (/[a-z]/.test(mdp)) score += 20;
+  if (/[0-9]/.test(mdp)) score += 15;
+  if (/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(mdp)) score += 15;
+  return Math.min(score, 100);
+}
+
+async function soumettreMdp() {
+  const nouveau  = document.getElementById("mdp-new").value;
+  const confirm  = document.getElementById("mdp-confirm").value;
+  const alerte   = document.getElementById("mdp-alerte");
+
+  alerte.style.display = "none";
+
+  if (!nouveau || !confirm) {
+    alerte.textContent   = "Veuillez remplir les deux champs.";
+    alerte.style.display = "block";
+    return;
+  }
+  if (nouveau !== confirm) {
+    alerte.textContent   = "Les deux mots de passe ne correspondent pas.";
+    alerte.style.display = "block";
+    return;
+  }
+  if (evaluerForce(nouveau) < 40) {
+    alerte.textContent   = "Mot de passe trop faible. Ajoutez majuscules, chiffres et caractères spéciaux.";
+    alerte.style.display = "block";
+    return;
+  }
+
+  try {
+    const r = await fetch("/change-password", {
+      method:  "POST",
+      headers: {
+        "Content-Type":  "application/json",
+        "Authorization": "Bearer " + G.access_token
+      },
+      body: JSON.stringify({ nouveau_mot_de_passe: nouveau })
+    });
+    const d = await r.json();
+
+    if (r.ok) {
+      // Succès — aller à l'écran de bienvenue
+      document.getElementById("s4").style.display = "none";
+      // Récupérer les infos depuis le JWT stocké
+      const parts   = G.access_token.split(".");
+      const payload = JSON.parse(atob(parts[1]));
+      allerEtape3({ role: payload.role, username: payload.sub, must_changer: false });
+    } else {
+      const msgs = d.details ? d.details.join(" | ") : (d.erreur || "Erreur inconnue");
+      alerte.textContent   = msgs;
+      alerte.style.display = "block";
+    }
+  } catch(err) {
+    alerte.textContent   = "Serveur inaccessible.";
+    alerte.style.display = "block";
+  }
+}
+
+</script>
+</body>
+</html>
