@@ -1,0 +1,57 @@
+# ── PERMISSIONS PAR RÔLE ──────────────────────────────────────────
+# Format : p, role, ressource, action
+
+# Admin — accès total
+p, admin, capteurs, read
+p, admin, capteurs, write
+p, admin, capteurs, delete
+p, admin, historiques, read
+p, admin, historiques, write
+p, admin, historiques, delete
+p, admin, modeles_ia, read
+p, admin, modeles_ia, write
+p, admin, modeles_ia, delete
+p, admin, predictions, read
+p, admin, predictions, execute
+p, admin, admin_panel, read
+p, admin, admin_panel, write
+p, admin, users, read
+p, admin, users, write
+p, admin, users, delete
+p, admin, export, read
+p, admin, audit_logs, read
+
+# Ingénieur de maintenance
+p, ingenieur_maintenance, capteurs, read
+p, ingenieur_maintenance, historiques, read
+p, ingenieur_maintenance, historiques, write
+p, ingenieur_maintenance, predictions, read
+p, ingenieur_maintenance, predictions, execute
+p, ingenieur_maintenance, alertes, read
+p, ingenieur_maintenance, alertes, write
+p, ingenieur_maintenance, rapports, read
+p, ingenieur_maintenance, rapports, write
+p, ingenieur_maintenance, modeles_ia, read
+p, ingenieur_maintenance, export, read
+
+# Opérateur
+p, operateur, predictions, read
+p, operateur, alertes, read
+p, operateur, alertes, execute
+p, operateur, rapports, read
+p, operateur, capteurs, read
+
+# Auditeur — lecture seule
+p, auditeur, capteurs, read
+p, auditeur, historiques, read
+p, auditeur, predictions, read
+p, auditeur, audit_logs, read
+p, auditeur, rapports, read
+p, auditeur, admin_panel, read
+p, auditeur, users, read
+
+# ── ASSIGNATION UTILISATEURS → RÔLES ──────────────────────────────
+g, alice, admin
+g, bob, ingenieur_maintenance
+g, charlie, operateur
+g, diana, auditeur

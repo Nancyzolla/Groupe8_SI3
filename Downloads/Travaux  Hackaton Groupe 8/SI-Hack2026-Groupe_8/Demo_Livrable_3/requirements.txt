@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+casbin
+bcrypt
+python-jose
+sqlalchemy
+pydantic
+python-multipart
+jinja2
+httpx
+pytest

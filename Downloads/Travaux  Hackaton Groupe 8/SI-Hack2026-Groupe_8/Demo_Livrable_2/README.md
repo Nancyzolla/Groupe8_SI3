@@ -1,0 +1,88 @@
+Pour démarrer l'environnement, il suffit de lancer le script `create_no_vpn.bash` en ayant `docker` et `docker-compose` installé.  
+Ici seront la liste des commandes utilisé pour la démo.
+  
+### Test pour la base de donné chiffré
+
+Se connecter a la base de donnés
+
+- docker exec -it pg psql -U demo -d maintenance
+  
+
+Affichage des données chiffrés
+
+- SELECT * FROM maintenance_logs;
+  
+
+Déchiffrement de la base avec la clé
+
+- SELECT pgp_sym_decrypt(data, 'cle-secrete') AS message FROM maintenance_logs;
+
+  
+
+### Test des communication avec et sans TLS
+
+Génération d'un certificat dans le dossier mqtt (plus besoin de le générér à nouveau)
+
+- openssl genrsa -out ca.key 2048
+
+- openssl req -x509 -new -nodes -key ca.key -sha256 -days 365 -out ca.crt -subj "/CN=MQTT-CA"
+
+- openssl genrsa -out server.key 2048
+
+- openssl req -new -key server.key -out server.csr -subj "/CN=localhost"
+
+- openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt -days 365 -sha256
+
+  
+
+Communication sans TLS
+
+Start sniffing
+
+- docker exec -it sniffer tcpdump -i any port 1883 -w mqtt.cap -v
+
+Création du canal non chiffré appelé "test"
+
+- docker exec -it mqtt mosquitto_sub -h localhost -t test
+
+Envoie d'un message sur ce canal (a taper dans un autre terminal)
+
+- docker exec -it pg mosquitto_pub -h mqtt -t test -m "HELLO HACKATON"
+
+Le fichier de dump sera dans sniffer sur la machine local.
+
+  
+
+Communication avec TLS
+
+Start sniffing
+
+- docker exec -it sniffer tcpdump -i any port 8883 -w mqtt.cap -v
+
+Création du canal chiffré
+
+- docker exec -it mqtt sh -c 'mosquitto_sub -h localhost -p 8883 --cafile /mosquitto/certs/ca.crt -t test'
+
+Envoie d'un message sur le canal sécurisé
+
+- docker exec -it pg sh -c 'mosquitto_pub -h mqtt -p 8883 --cafile /root/ca.crt -t test -m "HELLO HACKATON" --insecure'
+
+Le fichier de dump sera dans sniffer sur la machine local. On peut ensuite analyser avec wireshark
+
+  
+### Backup
+
+Dump la base maintenance
+
+- docker exec -it pg sh -c 'pg_dump -U demo -d maintenance > /backup/backup_maintenance.sql'
+ 
+
+Simuler ransomware (suppression de la base de donnée)
+
+- docker exec -it pg psql -U demo -d maintenance -c "DROP TABLE maintenance_logs;"
+
+
+Restauration
+
+- docker exec -ti pg sh -c 'psql -U demo -d maintenance < /backup/backup_maintenance.sql'
+

@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI4BMI — RBAC Control Center</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0e1a;
+  --surface: #0f1525;
+  --surface2: #141d35;
+  --border: #1e2d4d;
+  --accent: #00d4ff;
+  --accent2: #0088cc;
+  --green: #00ff88;
+  --red: #ff3355;
+  --orange: #ff8800;
+  --yellow: #ffd700;
+  --text: #c8d8f0;
+  --text-dim: #5a7099;
+  --text-bright: #e8f4ff;
+  --glow: 0 0 20px rgba(0,212,255,0.3);
+  --glow-green: 0 0 15px rgba(0,255,136,0.4);
+  --glow-red: 0 0 15px rgba(255,51,85,0.4);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── GRID BACKGROUND ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── LOGIN ── */
+#loginSection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+.login-wrap {
+  width: 420px;
+}
+
+.login-logo {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.login-logo .brand {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 6px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.login-logo .title {
+  font-family: 'Syne', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-bright);
+  line-height: 1;
+}
+
+.login-logo .subtitle {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 6px;
+  letter-spacing: 2px;
+}
+
+.login-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--accent);
+  border-radius: 4px;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: scanline 3s ease-in-out infinite;
+}
+
+@keyframes scanline {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.field-label {
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  margin-top: 20px;
+  display: block;
+}
+
+.field-label:first-of-type { margin-top: 0; }
+
+.login-box input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 12px 16px;
+  color: var(--text-bright);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.login-box input:focus {
+  border-color: var(--accent);
+  box-shadow: var(--glow);
+}
+
+.login-box input::placeholder { color: var(--text-dim); }
+
+.btn-login {
+  width: 100%;
+  margin-top: 28px;
+  padding: 14px;
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-login::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+  z-index: -1;
+}
+
+.btn-login:hover {
+  color: var(--bg);
+}
+
+.btn-login:hover::before { transform: scaleX(1); }
+
+.login-error {
+  margin-top: 15px;
+  padding: 10px 14px;
+  background: rgba(255,51,85,0.1);
+  border: 1px solid var(--red);
+  border-radius: 3px;
+  font-size: 12px;
+  color: var(--red);
+  display: none;
+}
+
+/* ── ADMIN SECTION ── */
+#adminSection { display: none; position: relative; z-index: 1; }
+
+/* TOPBAR */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 30px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.topbar-brand {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--text-bright);
+  letter-spacing: 1px;
+}
+
+.topbar-brand span { color: var(--accent); }
+
+.topbar-sep {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+}
+
+.topbar-module {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.status-dot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--green);
+}
+
+.dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: var(--glow-green);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 6px 14px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.user-chip .role-tag {
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+
+.btn-logout {
+  padding: 7px 16px;
+  background: transparent;
+  border: 1px solid var(--red);
+  color: var(--red);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.btn-logout:hover { background: var(--red); color: var(--bg); }
+
+/* LAYOUT */
+.layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: calc(100vh - 56px);
+}
+
+/* SIDEBAR */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 24px 0;
+}
+
+.sidebar-section {
+  margin-bottom: 8px;
+}
+
+.sidebar-label {
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  padding: 0 20px 8px;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-dim);
+  border-left: 2px solid transparent;
+  transition: all 0.15s;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-item:hover { color: var(--text); background: var(--surface2); }
+
+.sidebar-item.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: rgba(0,212,255,0.05);
+}
+
+.sidebar-item .icon { font-size: 14px; width: 20px; text-align: center; }
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 12px 20px;
+}
+
+/* MAIN */
+.main { padding: 28px 32px; }
+
+/* ALERTS */
+.alert-bar {
+  padding: 10px 16px;
+  border-radius: 3px;
+  font-size: 12px;
+  margin-bottom: 20px;
+  display: none;
+  border-left: 3px solid;
+}
+.alert-bar.success { background: rgba(0,255,136,0.08); border-color: var(--green); color: var(--green); }
+.alert-bar.error { background: rgba(255,51,85,0.08); border-color: var(--red); color: var(--red); }
+
+/* PAGE TITLE */
+.page-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-bright);
+  margin-bottom: 6px;
+}
+.page-sub { font-size: 11px; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 28px; }
+
+/* STATS GRID */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 20px 22px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.stat-card.blue::after { background: var(--accent); }
+.stat-card.green::after { background: var(--green); }
+.stat-card.red::after { background: var(--red); }
+.stat-card.yellow::after { background: var(--yellow); }
+
+.stat-card:hover { border-color: var(--accent); }
+
+.stat-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stat-card.blue .stat-value { color: var(--accent); }
+.stat-card.green .stat-value { color: var(--green); }
+.stat-card.red .stat-value { color: var(--red); }
+.stat-card.yellow .stat-value { color: var(--yellow); }
+
+.stat-label { font-size: 10px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; }
+
+/* PANEL */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+
+.panel-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-bright);
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panel-title .panel-icon { color: var(--accent); }
+
+.panel-body { padding: 22px; }
+
+/* ADD USER FORM */
+.add-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.input-group { display: flex; flex-direction: column; gap: 6px; }
+
+.input-group label {
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.input-group input,
+.input-group select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 10px 14px;
+  color: var(--text-bright);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input-group input:focus,
+.input-group select:focus { border-color: var(--accent); }
+
+.input-group select option { background: var(--surface); }
+
+.btn-add {
+  padding: 10px 20px;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 3px;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-add:hover { background: #00b8db; box-shadow: var(--glow); }
+
+/* TABLE */
+.data-table { width: 100%; border-collapse: collapse; }
+
+.data-table th {
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  padding: 10px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.data-table td {
+  padding: 13px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(30,45,77,0.5);
+  vertical-align: middle;
+}
+
+.data-table tr:hover td { background: rgba(0,212,255,0.03); }
+.data-table tr:last-child td { border-bottom: none; }
+
+/* ROLE BADGES */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 2px;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.badge-admin { background: rgba(0,212,255,0.12); color: var(--accent); border: 1px solid rgba(0,212,255,0.3); }
+.badge-ingenieur { background: rgba(0,255,136,0.08); color: var(--green); border: 1px solid rgba(0,255,136,0.2); }
+.badge-operateur { background: rgba(255,136,0,0.1); color: var(--orange); border: 1px solid rgba(255,136,0,0.25); }
+.badge-auditeur { background: rgba(255,215,0,0.08); color: var(--yellow); border: 1px solid rgba(255,215,0,0.2); }
+
+/* STATUS */
+.status-active {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--green);
+}
+
+.status-active::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: var(--glow-green);
+}
+
+/* ACTION BUTTONS */
+.action-row { display: flex; gap: 8px; align-items: center; }
+
+.role-select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 5px 10px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  outline: none;
+}
+
+.role-select:focus { border-color: var(--accent); }
+
+.btn-sm {
+  padding: 5px 12px;
+  border: 1px solid;
+  border-radius: 3px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  background: transparent;
+  transition: all 0.15s;
+  text-transform: uppercase;
+}
+
+.btn-sm.edit { border-color: var(--accent); color: var(--accent); }
+.btn-sm.edit:hover { background: var(--accent); color: var(--bg); }
+.btn-sm.del { border-color: var(--red); color: var(--red); }
+.btn-sm.del:hover { background: var(--red); color: #fff; }
+
+/* LOG ENTRIES */
+.log-list { display: flex; flex-direction: column; gap: 4px; max-height: 400px; overflow-y: auto; }
+.log-list::-webkit-scrollbar { width: 4px; }
+.log-list::-webkit-scrollbar-track { background: var(--bg); }
+.log-list::-webkit-scrollbar-thumb { background: var(--border); }
+
+.log-row {
+  display: grid;
+  grid-template-columns: 180px 90px 160px 140px 1fr 100px;
+  gap: 0;
+  padding: 8px 14px;
+  border-radius: 3px;
+  font-size: 11px;
+  border-left: 3px solid;
+  transition: background 0.15s;
+  align-items: center;
+}
+
+.log-row:hover { filter: brightness(1.15); }
+.log-row.denied { background: rgba(255,51,85,0.06); border-color: var(--red); }
+.log-row.allowed { background: rgba(0,255,136,0.04); border-color: var(--green); }
+
+.log-time { color: var(--text-dim); font-size: 10px; }
+.log-user { color: var(--text-bright); font-weight: 500; }
+.log-role { color: var(--orange); font-size: 10px; }
+.log-resource { color: var(--accent); font-size: 10px; }
+.log-ip { color: var(--text-dim); font-size: 10px; }
+.log-status { font-weight: 700; font-size: 10px; letter-spacing: 1px; text-align: right; }
+.log-row.denied .log-status { color: var(--red); }
+.log-row.allowed .log-status { color: var(--green); }
+
+/* REFRESH BTN */
+.btn-refresh {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.15s;
+  text-transform: uppercase;
+}
+
+.btn-refresh:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ID CELL */
+.id-cell {
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+/* USERNAME CELL */
+.user-cell { color: var(--text-bright); font-weight: 500; }
+
+/* ANIMATIONS */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.main > * { animation: fadeIn 0.3s ease forwards; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ LOGIN ════════════════════════════════ -->
+<div id="loginSection">
+  <div class="login-wrap">
+    <div class="login-logo">
+      <div class="brand">Hackathon AI4BMI</div>
+      <div class="title">RBAC Control Center</div>
+      <div class="subtitle">Sécurité Informatique — IFRI / UAC</div>
+    </div>
+    <div class="login-box">
+      <label class="field-label">Identifiant</label>
+      <input type="text" id="loginUser" placeholder="username" autocomplete="off">
+      <label class="field-label">Mot de passe</label>
+      <input type="password" id="loginPass" placeholder="••••••••">
+      <button class="btn-login" onclick="doLogin()">Connexion</button>
+      <div class="login-error" id="loginError"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ ADMIN ════════════════════════════════ -->
+<div id="adminSection">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-brand">AI4<span>BMI</span></div>
+      <div class="topbar-sep"></div>
+      <div class="topbar-module">RBAC Control Center</div>
+    </div>
+    <div class="topbar-right">
+      <div class="status-dot"><div class="dot"></div>Système opérationnel</div>
+      <div class="user-chip">
+        <span id="topUser">—</span>
+        <span class="role-tag">ADMIN</span>
+      </div>
+      <button class="btn-logout" onclick="logout()">Déconnexion</button>
+    </div>
+  </div>
+
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Navigation</div>
+        <div class="sidebar-item active" onclick="showTab('users')">
+          <span class="icon">👥</span> Utilisateurs
+        </div>
+        <div class="sidebar-item" onclick="showTab('logs')">
+          <span class="icon">📋</span> Audit Trail
+        </div>
+        <div class="sidebar-item" onclick="showTab('matrix')">
+          <span class="icon">🔐</span> Matrice RBAC
+        </div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Scénarios</div>
+        <div class="sidebar-item" style="color:#ff3355;font-size:11px">
+          <span class="icon">⚠</span> S3 — Fuite données
+        </div>
+        <div class="sidebar-item" style="color:#ff8800;font-size:11px">
+          <span class="icon">⚠</span> S5 — Inférence API
+        </div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Rôles définis</div>
+        <div class="sidebar-item" style="font-size:11px">
+          <span class="badge badge-admin">admin</span>
+        </div>
+        <div class="sidebar-item" style="font-size:11px">
+          <span class="badge badge-ingenieur">ingénieur</span>
+        </div>
+        <div class="sidebar-item" style="font-size:11px">
+          <span class="badge badge-operateur">opérateur</span>
+        </div>
+        <div class="sidebar-item" style="font-size:11px">
+          <span class="badge badge-auditeur">auditeur</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main">
+
+      <div id="alertSuccess" class="alert-bar success"></div>
+      <div id="alertError" class="alert-bar error"></div>
+
+      <!-- ── TAB: USERS ── -->
+      <div id="tabUsers">
+        <div class="page-title">Gestion des Utilisateurs</div>
+        <div class="page-sub">CONTRÔLE D'ACCÈS — PRINCIPE DU MOINDRE PRIVILÈGE</div>
+
+        <!-- STATS -->
+        <div class="stats-grid">
+          <div class="stat-card blue">
+            <div class="stat-value" id="statTotal">—</div>
+            <div class="stat-label">Utilisateurs</div>
+          </div>
+          <div class="stat-card red">
+            <div class="stat-value" id="statDenied">—</div>
+            <div class="stat-label">Accès refusés</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-value" id="statAllowed">—</div>
+            <div class="stat-label">Accès autorisés</div>
+          </div>
+          <div class="stat-card yellow">
+            <div class="stat-value">4</div>
+            <div class="stat-label">Rôles actifs</div>
+          </div>
+        </div>
+
+        <!-- USERS PANEL -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span class="panel-icon">◈</span> Annuaire des utilisateurs
+            </div>
+          </div>
+          <div class="panel-body">
+
+            <!-- ADD FORM -->
+            <div class="add-form">
+              <div class="input-group">
+                <label>Utilisateur</label>
+                <input type="text" id="newUsername" placeholder="ex: jean.dupont">
+              </div>
+              <div class="input-group">
+                <label>Mot de passe</label>
+                <input type="password" id="newPassword" placeholder="••••••••">
+              </div>
+              <div class="input-group">
+                <label>Rôle</label>
+                <select id="newRole">
+                  <option value="admin">Administrateur</option>
+                  <option value="ingenieur_maintenance">Ingénieur Maintenance</option>
+                  <option value="operateur" selected>Opérateur</option>
+                  <option value="auditeur">Auditeur</option>
+                </select>
+              </div>
+              <button class="btn-add" onclick="addUser()">+ Ajouter</button>
+            </div>
+
+            <!-- TABLE -->
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Utilisateur</th>
+                  <th>Rôle</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="usersTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB: LOGS ── -->
+      <div id="tabLogs" style="display:none">
+        <div class="page-title">Audit Trail</div>
+        <div class="page-sub">JOURNALISATION COMPLÈTE — TOUS LES ACCÈS HORODATÉS</div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><span class="panel-icon">◈</span> Journal des accès</div>
+            <button class="btn-refresh" onclick="loadLogs()">↻ Rafraîchir</button>
+          </div>
+          <div class="panel-body">
+            <div style="display:grid;grid-template-columns:180px 90px 160px 140px 1fr 100px;gap:0;padding:0 14px 10px;font-size:9px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase">
+              <span>Horodatage</span>
+              <span>Utilisateur</span>
+              <span>Rôle</span>
+              <span>Ressource</span>
+              <span>IP</span>
+              <span style="text-align:right">Statut</span>
+            </div>
+            <div class="log-list" id="auditLogs"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB: MATRIX ── -->
+      <div id="tabMatrix" style="display:none">
+        <div class="page-title">Matrice des Permissions RBAC</div>
+        <div class="page-sub">DROITS PAR RÔLE ET PAR RESSOURCE</div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><span class="panel-icon">◈</span> Contrôle d'accès granulaire</div>
+          </div>
+          <div class="panel-body">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Ressource</th>
+                  <th style="color:var(--accent)">Admin</th>
+                  <th style="color:var(--green)">Ingénieur</th>
+                  <th style="color:var(--orange)">Opérateur</th>
+                  <th style="color:var(--yellow)">Auditeur</th>
+                </tr>
+              </thead>
+              <tbody id="matrixTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+let token = null;
+
+const MATRIX = [
+  { resource: "Données capteurs",      admin:[1,1,1,1], ing:[1,1,0,1], op:[1,0,0,0], aud:[1,0,0,0] },
+  { resource: "Historiques maint.",    admin:[1,1,1,1], ing:[1,1,0,0], op:[1,0,0,0], aud:[1,0,0,0] },
+  { resource: "Modèles IA",            admin:[1,1,1,1], ing:[1,0,0,0], op:[0,0,0,0], aud:[1,0,0,0] },
+  { resource: "Prédictions",           admin:[1,1,1,1], ing:[1,0,0,1], op:[1,0,0,0], aud:[1,0,0,0] },
+  { resource: "API prédiction",        admin:[1,1,1,1], ing:[1,0,0,1], op:[0,0,0,1], aud:[1,0,0,0] },
+  { resource: "Interface admin",       admin:[1,1,1,1], ing:[0,0,0,0], op:[0,0,0,0], aud:[1,0,0,0] },
+  { resource: "Gestion utilisateurs",  admin:[1,1,1,1], ing:[0,0,0,0], op:[0,0,0,0], aud:[1,0,0,0] },
+  { resource: "Logs d'audit",          admin:[1,0,0,0], ing:[0,0,0,0], op:[0,0,0,0], aud:[1,0,0,0] },
+  { resource: "Export données",        admin:[1,1,1,1], ing:[1,0,0,0], op:[0,0,0,0], aud:[0,0,0,0] },
+  { resource: "Alertes",               admin:[1,1,1,1], ing:[1,1,0,1], op:[1,0,0,1], aud:[1,0,0,0] },
+];
+
+function permCell(perms) {
+  const labels = ['L','E','S','X'];
+  return perms.map((p,i) => `<span style="display:inline-block;width:20px;height:20px;line-height:20px;text-align:center;border-radius:2px;font-size:9px;margin:1px;font-weight:700;background:${p?'rgba(0,255,136,0.15)':'rgba(255,51,85,0.1)'};color:${p?'var(--green)':'var(--red)'}">${labels[i]}</span>`).join('');
+}
+
+function buildMatrix() {
+  const tbody = document.getElementById('matrixTable');
+  tbody.innerHTML = MATRIX.map((row,i) => `
+    <tr>
+      <td style="color:var(--text-bright);font-weight:500">${row.resource}</td>
+      <td>${permCell(row.admin)}</td>
+      <td>${permCell(row.ing)}</td>
+      <td>${permCell(row.op)}</td>
+      <td>${permCell(row.aud)}</td>
+    </tr>
+  `).join('');
+}
+
+function showTab(tab) {
+  ['Users','Logs','Matrix'].forEach(t => {
+    document.getElementById('tab'+t).style.display = 'none';
+  });
+  document.getElementById('tab'+tab.charAt(0).toUpperCase()+tab.slice(1)).style.display = 'block';
+  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  if (tab === 'logs') loadLogs();
+  if (tab === 'matrix') buildMatrix();
+}
+
+async function doLogin() {
+  const username = document.getElementById('loginUser').value;
+  const password = document.getElementById('loginPass').value;
+
+  try {
+    const resp = await fetch('/auth/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+    });
+
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data.role !== 'admin') {
+        showLoginError('Accès refusé — réservé aux administrateurs');
+        return;
+      }
+      token = data.access_token;
+      document.getElementById('loginSection').style.display = 'none';
+      document.getElementById('adminSection').style.display = 'block';
+      document.getElementById('topUser').textContent = username;
+      loadUsers();
+      loadStats();
+    } else {
+      showLoginError('Identifiants incorrects');
+    }
+  } catch(e) {
+    showLoginError('Erreur de connexion au serveur');
+  }
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('loginError');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function loadUsers() {
+  try {
+    const resp = await fetch('/admin/users-list', {
+      headers: {'Authorization': 'Bearer ' + token}
+    });
+    const data = await resp.json();
+    const tbody = document.getElementById('usersTable');
+    document.getElementById('statTotal').textContent = data.users.length;
+
+    tbody.innerHTML = data.users.map(u => {
+      const roleKey = u.role.split('_')[0];
+      return `<tr>
+        <td class="id-cell">#${String(u.id).padStart(3,'0')}</td>
+        <td class="user-cell">${u.username}</td>
+        <td><span class="badge badge-${roleKey}">${u.role}</span></td>
+        <td><span class="status-active">Actif</span></td>
+        <td>
+          <div class="action-row">
+            <select class="role-select" id="role_${u.id}">
+              <option value="admin" ${u.role==='admin'?'selected':''}>admin</option>
+              <option value="ingenieur_maintenance" ${u.role==='ingenieur_maintenance'?'selected':''}>ingenieur_maintenance</option>
+              <option value="operateur" ${u.role==='operateur'?'selected':''}>operateur</option>
+              <option value="auditeur" ${u.role==='auditeur'?'selected':''}>auditeur</option>
+            </select>
+            <button class="btn-sm edit" onclick="updateRole(${u.id})">✏ Modifier</button>
+            <button class="btn-sm del" onclick="deleteUser(${u.id},'${u.username}')">✕ Supprimer</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch(e) { showAlert('error', 'Erreur chargement utilisateurs'); }
+}
+
+async function loadStats() {
+  try {
+    const resp = await fetch('/admin/logs', {
+      headers: {'Authorization': 'Bearer ' + token}
+    });
+    const data = await resp.json();
+    let denied = 0, allowed = 0;
+    data.logs.forEach(l => l.status === 'DENIED' ? denied++ : allowed++);
+    document.getElementById('statDenied').textContent = denied;
+    document.getElementById('statAllowed').textContent = allowed;
+  } catch(e) {}
+}
+
+async function addUser() {
+  const username = document.getElementById('newUsername').value.trim();
+  const password = document.getElementById('newPassword').value;
+  const role     = document.getElementById('newRole').value;
+
+  if (!username || !password) { showAlert('error', 'Remplissez tous les champs'); return; }
+
+  try {
+    const resp = await fetch('/admin/users-add', {
+      method: 'POST',
+      headers: {'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json'},
+      body: JSON.stringify({username, password, role})
+    });
+
+    if (resp.ok) {
+      showAlert('success', `Utilisateur "${username}" ajouté avec le rôle [${role}]`);
+      document.getElementById('newUsername').value = '';
+      document.getElementById('newPassword').value = '';
+      loadUsers();
+    } else {
+      const err = await resp.json();
+      showAlert('error', err.detail || 'Erreur lors de l\'ajout');
+    }
+  } catch(e) { showAlert('error', 'Erreur réseau'); }
+}
+
+async function updateRole(userId) {
+  const newRole = document.getElementById('role_' + userId).value;
+  try {
+    const resp = await fetch('/admin/users-update/' + userId, {
+      method: 'PUT',
+      headers: {'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json'},
+      body: JSON.stringify({role: newRole})
+    });
+    if (resp.ok) { showAlert('success', 'Rôle mis à jour → ' + newRole); loadUsers(); }
+    else showAlert('error', 'Erreur modification');
+  } catch(e) { showAlert('error', 'Erreur réseau'); }
+}
+
+async function deleteUser(userId, username) {
+  if (!confirm(`Supprimer l'utilisateur "${username}" ?`)) return;
+  try {
+    const resp = await fetch('/admin/users-delete/' + userId, {
+      method: 'DELETE',
+      headers: {'Authorization': 'Bearer ' + token}
+    });
+    if (resp.ok) { showAlert('success', `"${username}" supprimé`); loadUsers(); }
+    else showAlert('error', 'Erreur suppression');
+  } catch(e) { showAlert('error', 'Erreur réseau'); }
+}
+
+async function loadLogs() {
+  try {
+    const resp = await fetch('/admin/logs', {
+      headers: {'Authorization': 'Bearer ' + token}
+    });
+    const data = await resp.json();
+    const div = document.getElementById('auditLogs');
+
+    div.innerHTML = [...data.logs].reverse().map(log => {
+      const isDenied = log.status === 'DENIED';
+      const time = log.timestamp.replace('T',' ').slice(0,19);
+      return `<div class="log-row ${isDenied?'denied':'allowed'}">
+        <span class="log-time">${time}</span>
+        <span class="log-user">${log.username}</span>
+        <span class="log-role">${log.role}</span>
+        <span class="log-resource">${log.resource}:${log.action}</span>
+        <span class="log-ip">${log.ip}</span>
+        <span class="log-status">${isDenied?'🚫 REFUSÉ':'✅ AUTORISÉ'}</span>
+      </div>`;
+    }).join('');
+
+    let denied = 0, allowed = 0;
+    data.logs.forEach(l => l.status==='DENIED' ? denied++ : allowed++);
+    document.getElementById('statDenied').textContent = denied;
+    document.getElementById('statAllowed').textContent = allowed;
+  } catch(e) { showAlert('error', 'Erreur chargement logs'); }
+}
+
+function showAlert(type, msg) {
+  const el = document.getElementById('alert' + (type==='success'?'Success':'Error'));
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.className = 'alert-bar ' + type;
+  setTimeout(() => el.style.display = 'none', 4000);
+}
+
+function logout() {
+  token = null;
+  document.getElementById('loginSection').style.display = 'flex';
+  document.getElementById('adminSection').style.display = 'none';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('loginSection').style.display !== 'none') {
+    doLogin();
+  }
+});
+</script>
+</body>
+</html>

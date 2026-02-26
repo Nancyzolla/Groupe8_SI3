@@ -1,0 +1,51 @@
+volumes:
+  pg-data:
+  pg-data-backup:
+
+networks:
+  hackaton:
+services:
+  postgres:
+    build:
+      context: pg
+      dockerfile: Dockerfile
+    container_name: pg
+    hostname: pg
+    environment:
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demo123
+      POSTGRES_DB: maintenance
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - ./pg/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - hackaton
+
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: mqtt
+    hostname: mqtt
+    volumes:
+      - ./mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mqtt/certs:/mosquitto/certs
+    ports:
+      - "1883:1883"   # sans TLS
+      - "8883:8883"   # TLS
+    networks:
+      - hackaton
+
+  sniffer:
+    build:
+      context: sniffer
+      dockerfile: Dockerfile
+    container_name: sniffer
+    hostname: sniffer
+    network_mode: "host"
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./sniffer:/root
+    #networks:
+      #- hackaton
